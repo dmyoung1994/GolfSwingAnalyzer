@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">GolfSwingAnalyzer</string>
+    <string name="pref_key_camera_live_viewport" translatable="false">clv</string>
+    <string name="camera_flip_content_description" translatable="false">flip camera button</string>
+</resources>
