@@ -24,14 +24,11 @@ import android.graphics.PointF;
 import androidx.annotation.Nullable;
 
 import com.example.golfswinganalyzer.constants.PoseConstants;
-import com.example.golfswinganalyzer.graphics.GraphicOverlay;
-import com.google.common.collect.Sets;
 import com.google.mlkit.vision.pose.Pose;
 import com.google.mlkit.vision.pose.PoseLandmark;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 
 /** Draw the detected pose in preview. */
 public class PoseGraphic extends GraphicOverlay.Graphic {

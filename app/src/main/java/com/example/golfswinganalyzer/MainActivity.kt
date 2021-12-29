@@ -7,7 +7,7 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.golfswinganalyzer.analyzer.FullSwingAnalyzer
-import com.example.golfswinganalyzer.camerax.CameraManager
+import com.example.golfswinganalyzer.camera.CameraManager
 import com.example.golfswinganalyzer.dao.FullSwing
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -42,8 +42,7 @@ class MainActivity : AppCompatActivity() {
     private fun createCameraManager() {
         cameraManager = CameraManager(
             this,
-             findViewById(R.id.previewView),
-            this,
+            findViewById(R.id.preview_view),
             findViewById(R.id.graphic_overlay)
         )
     }
@@ -52,6 +51,7 @@ class MainActivity : AppCompatActivity() {
         requestCode: Int, permissions: Array<String>, grantResults:
         IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
                 cameraManager.startCamera()
@@ -75,6 +75,7 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(
             android.Manifest.permission.CAMERA,
+            android.Manifest.permission.RECORD_AUDIO
         )
     }
 }

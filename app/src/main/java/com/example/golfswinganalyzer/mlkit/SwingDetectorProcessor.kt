@@ -17,13 +17,9 @@
 package com.example.golfswinganalyzer.mlkit
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.Intent
-import android.graphics.Bitmap
 import android.util.Log
 import com.example.golfswinganalyzer.MainActivity
-import com.example.golfswinganalyzer.camerax.CameraManager
-import com.example.golfswinganalyzer.constants.BroadcastConstants
+import com.example.golfswinganalyzer.camera.CameraManager
 import com.example.golfswinganalyzer.constants.PoseConstants
 import com.example.golfswinganalyzer.dao.FullSwing
 import com.example.golfswinganalyzer.dao.SwingPhase
@@ -32,9 +28,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.example.golfswinganalyzer.graphics.GraphicOverlay
 import com.google.mlkit.vision.pose.*
 import com.example.golfswinganalyzer.graphics.PoseGraphic
-import com.google.gson.Gson
 import java.util.*
-import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.concurrent.timerTask
 import kotlin.math.abs
 import kotlin.math.max
@@ -76,8 +70,7 @@ class SwingDetectorProcessor(
 
     override fun onSuccess(
         pose: Pose,
-        graphicOverlay: GraphicOverlay,
-        originalCameraImage: Bitmap?
+        graphicOverlay: GraphicOverlay
     ) {
         if (pose.allPoseLandmarks.isEmpty()) {
             return
@@ -93,16 +86,16 @@ class SwingDetectorProcessor(
         }
 
         if (!allPointsInFrame) {
-            // TODO: Toast to the user to please get in frame
             resetPositions()
             return
         }
 
         graphicOverlay.add(PoseGraphic(graphicOverlay, pose))
-        analyzeSwing(pose, originalCameraImage)
+        analyzeSwing(pose)
     }
 
-    private fun analyzeSwing(pose: Pose, cameraImage: Bitmap?) {
+    @SuppressLint("UnsafeOptInUsageError")
+    private fun analyzeSwing(pose: Pose) {
         // If we have nothing to process, just skip
         if (pose.allPoseLandmarks.isEmpty()) {
             return
@@ -126,20 +119,16 @@ class SwingDetectorProcessor(
                 frameJiggle = abs(previousHandPosition.second - handPositionY)
                 maxJiggle = max(frameJiggle, maxJiggle)
                 trackLowPos(handPositionY)
-                cameraManager.onPhaseProcessed(cameraImage)
             }
             SwingPhase.BACK_SWING -> {
                 trackHighPos(handPositionY)
                 fullSwingData!!.backSwingData.addPose(pose)
-                cameraManager.onPhaseProcessed(cameraImage)
             }
             SwingPhase.DOWN_SWING -> {
                 fullSwingData!!.downSwingPhaseData.addPose(pose)
-                cameraManager.onPhaseProcessed(cameraImage)
             }
             SwingPhase.FOLLOW_THROUGH -> {
                 fullSwingData!!.followThroughPhaseData.addPose(pose)
-                cameraManager.onPhaseProcessed(cameraImage)
             }
             else -> {/* NOOP */}
         }

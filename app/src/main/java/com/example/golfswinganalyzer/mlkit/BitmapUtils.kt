@@ -9,6 +9,7 @@ import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
 import android.renderscript.ScriptIntrinsicYuvToRGB
+import com.example.golfswinganalyzer.BuildConfig
 import java.nio.ByteBuffer
 
 class BitmapUtils(context: Context) {
@@ -50,7 +51,9 @@ class BitmapUtils(context: Context) {
     }
 
     private fun imageToByteBuffer(image: Image, outputBuffer: ByteBuffer) {
-        assert(image.format == ImageFormat.YUV_420_888)
+        if (BuildConfig.DEBUG && image.format != ImageFormat.YUV_420_888) {
+            error("Assertion failed")
+        }
 
         val imageCrop = image.cropRect
         val imagePlanes = image.planes

@@ -17,31 +17,23 @@
 package com.example.golfswinganalyzer.mlkit;
 
 import android.app.ActivityManager;
-import android.app.ActivityManager.MemoryInfo;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.os.Build.VERSION_CODES;
 import android.os.SystemClock;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import android.util.Log;
 import android.widget.Toast;
 import androidx.camera.core.ExperimentalGetImage;
 import androidx.camera.core.ImageProxy;
 
-import com.example.golfswinganalyzer.BuildConfig;
-import com.example.golfswinganalyzer.graphics.CameraImageGraphic;
 import com.example.golfswinganalyzer.graphics.GraphicOverlay;
-import com.example.golfswinganalyzer.camerax.InferenceInfoGraphic;
-import com.example.golfswinganalyzer.camerax.ScopedExecutor;
-import com.example.golfswinganalyzer.preference.PreferenceUtils;
+import com.example.golfswinganalyzer.camera.InferenceInfoGraphic;
+import com.example.golfswinganalyzer.camera.ScopedExecutor;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.TaskExecutors;
 import com.google.mlkit.vision.common.InputImage;
@@ -51,7 +43,7 @@ import java.util.TimerTask;
 
 /**
  * Abstract base class for vision frame processors. Subclasses need to implement {@link
- * #onSuccess(Object, GraphicOverlay, Bitmap)} to define what they want to with the detection results and
+ * #onSuccess(Object, GraphicOverlay)} to define what they want to with the detection results and
  * {@link #detectInImage(InputImage)} to specify the detector object.
  *
  * @param <T> The type of the detected feature.
@@ -135,7 +127,6 @@ public abstract class VisionProcessorBase<T> implements VisionImageProcessor {
         requestDetectInImage(
                 InputImage.fromMediaImage(image.getImage(), image.getImageInfo().getRotationDegrees()),
                 graphicOverlay,
-                /* originalCameraImage= */ rotated,
                 /* shouldShowFps= */ true)
                 // When the image is from CameraX analysis use case, must call image.close() on received
                 // images when finished using them. Otherwise, new images may not be received or the camera
@@ -144,10 +135,9 @@ public abstract class VisionProcessorBase<T> implements VisionImageProcessor {
     }
 
     // -----------------Common processing logic-------------------------------------------------------
-    private Task<T> requestDetectInImage(
+    public Task<T> requestDetectInImage(
             final InputImage image,
             final GraphicOverlay graphicOverlay,
-            @Nullable final Bitmap originalCameraImage,
             boolean shouldShowFps) {
         final long startMs = SystemClock.elapsedRealtime();
         return detectInImage(image)
@@ -161,12 +151,14 @@ public abstract class VisionProcessorBase<T> implements VisionImageProcessor {
                                 maxRunMs = Math.max(currentLatencyMs, maxRunMs);
                                 minRunMs = Math.min(currentLatencyMs, minRunMs);
 
-                                graphicOverlay.clear();
-                                graphicOverlay.add(
-                                        new InferenceInfoGraphic(
-                                                graphicOverlay, currentLatencyMs, shouldShowFps ? framesPerSecond : null));
-                                VisionProcessorBase.this.onSuccess(results, graphicOverlay, originalCameraImage);
-                                graphicOverlay.postInvalidate();
+                                if (graphicOverlay != null) {
+                                    graphicOverlay.clear();
+                                    graphicOverlay.add(
+                                            new InferenceInfoGraphic(
+                                                    graphicOverlay, currentLatencyMs, shouldShowFps ? framesPerSecond : null));
+                                    VisionProcessorBase.this.onSuccess(results, graphicOverlay);
+                                    graphicOverlay.postInvalidate();
+                                }
                         })
                 .addOnFailureListener(
                         executor,
@@ -196,7 +188,7 @@ public abstract class VisionProcessorBase<T> implements VisionImageProcessor {
 
     protected abstract Task<T> detectInImage(InputImage image);
 
-    protected abstract void onSuccess(@NonNull T results, @NonNull GraphicOverlay graphicOverlay, @Nullable Bitmap originalCameraImage);
+    protected abstract void onSuccess(@NonNull T results, @NonNull GraphicOverlay graphicOverlay);
 
     protected abstract void onFailure(@NonNull Exception e);
 }

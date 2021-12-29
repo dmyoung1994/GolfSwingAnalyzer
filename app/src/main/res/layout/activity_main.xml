@@ -11,16 +11,16 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent">
 
-        <androidx.camera.view.PreviewView
-            android:id="@+id/previewView"
-            android:layout_height="match_parent"
+        <com.example.golfswinganalyzer.graphics.CameraSourcePreview
+            android:id="@+id/preview_view"
             android:layout_width="match_parent"
-            app:scaleType="fillCenter" />
+            android:layout_height="match_parent">
 
-        <com.example.golfswinganalyzer.graphics.GraphicOverlay
-            android:id="@+id/graphic_overlay"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            <com.example.golfswinganalyzer.graphics.GraphicOverlay
+                android:id="@+id/graphic_overlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </com.example.golfswinganalyzer.graphics.CameraSourcePreview>
     </FrameLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
