@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         if (allPermissionsGranted()) {
             cameraManager.startCamera()
         } else {
-            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+            requestPermissions()
         }
 
         // On click listeners
@@ -32,6 +32,10 @@ class MainActivity : AppCompatActivity() {
         cameraFlipButton.setOnClickListener{
             handleCameraFlipPressed()
         }
+    }
+
+    fun requestPermissions() {
+        ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
     }
 
     fun analyzeSwing(fullSwing: FullSwing) {

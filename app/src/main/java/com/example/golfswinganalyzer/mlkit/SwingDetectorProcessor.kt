@@ -36,7 +36,7 @@ import kotlin.math.max
 /** A processor to run pose detector.  */
 @SuppressLint("UnsafeExperimentalUsageError")
 class SwingDetectorProcessor(
-    private val activity: MainActivity,
+    activity: MainActivity,
     options: PoseDetectorOptionsBase,
     private val cameraManager: CameraManager
 ) : VisionProcessorBase<Pose>(activity.baseContext) {
@@ -64,21 +64,21 @@ class SwingDetectorProcessor(
         detector.close()
     }
 
-    override fun detectInImage(image: InputImage): Task<Pose?> {
+    override fun detectInImage(image: InputImage): Task<Pose> {
         return detector.process(image)
     }
 
     override fun onSuccess(
-        pose: Pose,
+        results: Pose,
         graphicOverlay: GraphicOverlay
     ) {
-        if (pose.allPoseLandmarks.isEmpty()) {
+        if (results.allPoseLandmarks.isEmpty()) {
             return
         }
 
         // Don't care if the whole body isn't in frame. Ignore process
         var allPointsInFrame = true
-        for (landmark in pose.allPoseLandmarks) {
+        for (landmark in results.allPoseLandmarks) {
             // We only care about it the points we care about are in the frame
             if (PoseConstants.drawablePoints.contains(landmark.landmarkType)) {
                 allPointsInFrame = allPointsInFrame && landmark.inFrameLikelihood > 0.5
@@ -90,8 +90,8 @@ class SwingDetectorProcessor(
             return
         }
 
-        graphicOverlay.add(PoseGraphic(graphicOverlay, pose))
-        analyzeSwing(pose)
+        graphicOverlay.add(PoseGraphic(graphicOverlay, results))
+        analyzeSwing(results)
     }
 
     @SuppressLint("UnsafeOptInUsageError")
@@ -231,6 +231,7 @@ class SwingDetectorProcessor(
         }
     }
 
+    @androidx.camera.core.ExperimentalGetImage
     private fun resetSwingTrackerAfterDelay() {
         Timer().schedule(timerTask {
             cameraManager.onSwingFinished(fullSwingData!!)
