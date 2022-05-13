@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/home"
+        android:title="@string/feed"
+        android:icon="@drawable/ic_baseline_co_present_24"
+        android:contentDescription="@string/a_feed_of_drills_to_do_to_improve_based_off_your_swings"
+        app:showAsAction="ifRoom"
+        />
+
+    <item
+        android:id="@+id/gallery"
+        android:title="@string/gallery"
+        android:icon="@drawable/ic_baseline_photo_library_24"
+        android:contentDescription="@string/a_gallery_for_all_your_recorded_swings"
+        app:showAsAction="ifRoom"
+    />
+
+    <item
+        android:id="@+id/placeholder"
+        android:title="" />
+
+    <item
+        android:id="@+id/recorder"
+        android:title="@string/record"
+        android:icon="@drawable/ic_baseline_videocam_24"
+        android:contentDescription="@string/automatically_record_your_swings"
+        app:showAsAction="ifRoom"
+    />
+
+    <item
+        android:id="@+id/profile"
+        android:title="@string/profile"
+        android:icon="@drawable/ic_baseline_person_24"
+        android:contentDescription="@string/information_about_yourself"
+        app:showAsAction="ifRoom"
+        />
+</menu>
