@@ -11,9 +11,6 @@ import com.golfapp.swingly.analyzer.FullSwingAnalyzer
 import com.golfapp.swingly.camera.CameraManager
 import com.golfapp.swingly.dao.FullSwing
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -44,11 +41,11 @@ class SwingRecorderFragment : AppCompatActivity() {
         ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
     }
 
-    fun analyzeSwing(fullSwing: FullSwing, swingID: String) = runBlocking {
+    fun analyzeSwing(fullSwing: FullSwing, swingID: String, swingFileName: String) = runBlocking {
         val fullSwingAnalyzer = FullSwingAnalyzer(fullSwing)
         val fullSwingData = fullSwingAnalyzer.run()
+        fullSwingData.videoID = swingID
         val fullSwingJSON = Json.encodeToString(fullSwingData)
-
     }
 
     private fun createCameraManager() {

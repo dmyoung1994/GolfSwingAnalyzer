@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class FullSwingResultData (
+    var videoID: String = "",
     var backSwingResultData: BackSwingResultData = BackSwingResultData()
     // TODO: Do downswing and follow through data
 )

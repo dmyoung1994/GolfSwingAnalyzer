@@ -3,11 +3,8 @@
 package com.golfapp.swingly.camera
 
 import android.Manifest
-import android.content.ContentValues
 import android.content.pm.PackageManager
 import android.media.MediaActionSound
-import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 import androidx.camera.core.*
@@ -26,9 +23,7 @@ import com.google.mlkit.vision.pose.defaults.PoseDetectorOptions
 import java.lang.IllegalStateException
 import androidx.core.content.ContextCompat
 import androidx.core.util.Consumer
-import com.golfapp.swingly.R
 import com.golfapp.swingly.util.FileIO
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
@@ -43,6 +38,7 @@ class CameraManager(
 
     private var mIsRecordingVideo = false
     private var mVideoID = ""
+    private var mSwingName = ""
     private var mLensFacing = CameraSelector.LENS_FACING_BACK
     private var mAnalysisExecutor = Executors.newSingleThreadScheduledExecutor()
 
@@ -129,14 +125,22 @@ class CameraManager(
             .setImageQueueDepth(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .build()
             .also {
-                it.setAnalyzer(mAnalysisExecutor, { imageProxy: ImageProxy ->
+                it.setAnalyzer(mAnalysisExecutor) { imageProxy: ImageProxy ->
                     if (mNeedUpdateGraphicOverlayImageSourceInfo) {
                         val isImageFlipped = mLensFacing == CameraSelector.LENS_FACING_FRONT
                         val rotationDegrees = imageProxy.imageInfo.rotationDegrees
                         if (rotationDegrees == 0 || rotationDegrees == 180) {
-                            graphicOverlay!!.setImageSourceInfo(imageProxy.width, imageProxy.height, isImageFlipped)
+                            graphicOverlay!!.setImageSourceInfo(
+                                imageProxy.width,
+                                imageProxy.height,
+                                isImageFlipped
+                            )
                         } else {
-                            graphicOverlay!!.setImageSourceInfo(imageProxy.height, imageProxy.width, isImageFlipped)
+                            graphicOverlay!!.setImageSourceInfo(
+                                imageProxy.height,
+                                imageProxy.width,
+                                isImageFlipped
+                            )
                         }
                         mNeedUpdateGraphicOverlayImageSourceInfo = false
                     }
@@ -146,7 +150,7 @@ class CameraManager(
                         Log.e(TAG, "Failed to process image. Error: " + e.localizedMessage)
                         Toast.makeText(context, e.localizedMessage, Toast.LENGTH_SHORT).show()
                     }
-                })
+                }
             }
 
         resetProviderLifecycle(cameraProvider)
@@ -175,10 +179,11 @@ class CameraManager(
             .addUseCase(mVideoCapture)
             .build()
         resetProviderLifecycle(mCameraProvider!!, useCaseGroup)
-        val name = SimpleDateFormat(FILENAME, Locale.US).format(System.currentTimeMillis()) + VIDEO_EXTENSION
+        mSwingName = SimpleDateFormat(FILENAME, Locale.US).format(System.currentTimeMillis())
+        val videoName = mSwingName + VIDEO_EXTENSION
 
         mVideoID = UUID.randomUUID().toString()
-        val mediaStoreOutput = FileIO.mediaStoreOutput(name, "video/mp4", mVideoID, context)
+        val mediaStoreOutput = FileIO.mediaStoreOutput(videoName, "video/mp4", mVideoID, context)
 
         if (ActivityCompat.checkSelfPermission(
                 context,
@@ -222,7 +227,7 @@ class CameraManager(
     fun onSwingFinished(fullSwingData: FullSwing?) {
         mRecording?.stop()
         mIsRecordingVideo = false
-        context.analyzeSwing(fullSwingData!!, mVideoID)
+        context.analyzeSwing(fullSwingData!!, mVideoID, mSwingName)
         context.runOnUiThread {
             resetProviderLifecycle(mCameraProvider!!)
         }
